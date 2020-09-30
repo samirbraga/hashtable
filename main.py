@@ -1,6 +1,4 @@
-import numpy as np
-from commands import Cmd
-from hashtable import Hashtable, _split_in_binary_pieces
+from hashtable import Hashtable
 from logger import Logger
 from input_parser import parse_input
 

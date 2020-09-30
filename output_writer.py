@@ -7,7 +7,7 @@ def output_writer(track: List[Tuple[Cmd, np.int64]], output_file: str) -> None:
     result = ""
     for log in track:
         if log is None:
-            result += '\n\n'
+            result += '\n'
         elif type(log) is tuple:
             if isinstance(log[0], Cmd):
                 result += "%s:%d\n" % log
