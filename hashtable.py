@@ -53,6 +53,8 @@ class Hashtable:
         self.logger = logger
         self._table_size = table_size
         self._filled = 0
+        self._removed_count = 0
+        self._removed_clean_threshold = 0.25
         self._table = _init_table(table_size)
         self._grow_threshold = grow_threshold
         self._shrink_threshold = shrink_threshold
@@ -100,7 +102,11 @@ class Hashtable:
 
         if position >= 0:
             self._table[position].remove()
+            self._removed_count += 1
             self._filled -= 1
+
+            if self._removed_count > self._removed_clean_threshold:
+                self._clean_removed()
 
             if (self._filled / self._table_size) < self._shrink_threshold:
                 self._halving()
@@ -127,6 +133,7 @@ class Hashtable:
         for el in old_table:
             if el.value is not None:
                 self._internal_add(el.value)
+        self._removed_count = 0
 
     def _doubling(self):
         old_table = self._table.copy()
@@ -143,3 +150,15 @@ class Hashtable:
         self._copy(old_table)
 
         self.logger.cmd(Cmd.METADE_TAM, self._table_size)
+
+    def _clean_removed(self, begin = 0):
+        begin = 0
+        while i < self._table_size:
+            j = i
+            while not self._table[j].is_defined() and j < self._table_size - 1:
+                j += 1
+            if j == self._table_size - 1 and self._table[j].removed:
+                break
+
+
+
