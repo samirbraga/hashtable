@@ -1,3 +1,5 @@
+from typing import Optional
+
 from commands import Cmd
 from output_writer import output_writer
 
@@ -16,7 +18,7 @@ class Logger:
             None
         ])
 
-    def cmd(self, cmd: Cmd, value: int) -> None:
+    def cmd(self, cmd: Cmd, value: Optional[int] = None) -> None:
         self.logs.extend([
             (cmd, value),
             None

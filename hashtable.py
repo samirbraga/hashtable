@@ -1,6 +1,6 @@
-from random import random, randint
+from random import randint
 from functools import reduce
-from typing import List, Optional
+from typing import Optional
 
 from commands import Cmd
 from logger import Logger
@@ -44,7 +44,7 @@ class Element:
 
 
 def _init_table(n):
-    return [Element() for i in range(n)]
+    return [Element() for _ in range(n)]
 
 
 class Hashtable:
@@ -117,7 +117,7 @@ class Hashtable:
         position = (hash_result + offset) % self._table_size
         element = self._table[position]
 
-        while element.removed and element.value != value and offset < self._table_size:
+        while (element.removed or element.value != value) and offset < self._table_size:
             position = (hash_result + offset) % self._table_size
             element = self._table[position]
             offset += 1
@@ -153,32 +153,33 @@ class Hashtable:
 
     def _clean_removed(self):
         def clean(i=0):
-            rmvd_range_start = None
-            rmvd_range_end = None
+            removed_start = None
+            removed_end = None
 
             if i >= self._table_size:
                 return
 
             while i < self._table_size:
-                if self._table[i].removed and rmvd_range_start is None:
-                    rmvd_range_start = i
-                if self._table[i].is_defined() and rmvd_range_start is not None:
-                    rmvd_range_end = i
+                if self._table[i].removed and removed_start is None:
+                    removed_start = i
+                if self._table[i].is_defined() and removed_start is not None:
+                    removed_end = i
                     break
                 i += 1
 
-            if rmvd_range_end is not None and rmvd_range_start is not None:
-                rmvd_range_size = rmvd_range_end - rmvd_range_start
+            if removed_end is not None and removed_start is not None:
+                removed_size = removed_end - removed_start
                 while i < self._table_size - 1:
                     if self._table[i + 1].is_defined():
-                        self._table[i - rmvd_range_size] = self._table[i + 1]
+                        self._table[i - removed_size] = self._table[i + 1]
                         i += 1
+                    else:
+                        break
 
                 clean(i)
 
         clean()
 
-        self.logger.cmd(Cmd.LIMPAR, self._table_size)
+        self._removed_count = 0
 
-
-
+        self.logger.cmd(Cmd.LIMPAR)

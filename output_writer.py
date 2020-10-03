@@ -9,10 +9,13 @@ def output_writer(track: List[Tuple[Cmd, np.int64]], output_file: str) -> None:
         if log is None:
             result += '\n'
         elif type(log) is tuple:
-            if isinstance(log[0], Cmd):
-                result += "%s:%d\n" % log
+            if log[1] is None:
+                result += "%s\n" % log[0]
             else:
-                result += "%s %d\n" % log
+                if isinstance(log[0], Cmd):
+                    result += "%s:%d\n" % log
+                else:
+                    result += "%s %d\n" % log
 
     with open(output_file, "w+") as output:
         output.write(result)
