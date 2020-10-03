@@ -105,7 +105,7 @@ class Hashtable:
             self._removed_count += 1
             self._filled -= 1
 
-            if self._removed_count > self._removed_clean_threshold:
+            if (self._removed_count / self._table_size) > self._removed_clean_threshold:
                 self._clean_removed()
 
             if (self._filled / self._table_size) < self._shrink_threshold:
@@ -117,7 +117,7 @@ class Hashtable:
         position = (hash_result + offset) % self._table_size
         element = self._table[position]
 
-        while element.removed and offset < self._table_size:
+        while element.removed and element.value != value and offset < self._table_size:
             position = (hash_result + offset) % self._table_size
             element = self._table[position]
             offset += 1
@@ -151,14 +151,34 @@ class Hashtable:
 
         self.logger.cmd(Cmd.METADE_TAM, self._table_size)
 
-    def _clean_removed(self, begin = 0):
-        begin = 0
-        while i < self._table_size:
-            j = i
-            while not self._table[j].is_defined() and j < self._table_size - 1:
-                j += 1
-            if j == self._table_size - 1 and self._table[j].removed:
-                break
+    def _clean_removed(self):
+        def clean(i=0):
+            rmvd_range_start = None
+            rmvd_range_end = None
+
+            if i >= self._table_size:
+                return
+
+            while i < self._table_size:
+                if self._table[i].removed and rmvd_range_start is None:
+                    rmvd_range_start = i
+                if self._table[i].is_defined() and rmvd_range_start is not None:
+                    rmvd_range_end = i
+                    break
+                i += 1
+
+            if rmvd_range_end is not None and rmvd_range_start is not None:
+                rmvd_range_size = rmvd_range_end - rmvd_range_start
+                while i < self._table_size - 1:
+                    if self._table[i + 1].is_defined():
+                        self._table[i - rmvd_range_size] = self._table[i + 1]
+                        i += 1
+
+                clean(i)
+
+        clean()
+
+        self.logger.cmd(Cmd.LIMPAR, self._table_size)
 
 
 
