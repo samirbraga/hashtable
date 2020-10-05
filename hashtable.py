@@ -160,8 +160,10 @@ class Hashtable:
                 return
 
             while i < self._table_size:
-                if self._table[i].removed and removed_start is None:
-                    removed_start = i
+                if self._table[i].removed:
+                    self._table[i] = Element()
+                    if removed_start is None:
+                        removed_start = i
                 if self._table[i].is_defined() and removed_start is not None:
                     removed_end = i
                     break
