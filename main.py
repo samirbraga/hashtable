@@ -7,15 +7,16 @@ from input_parser import parse_input
 argument_list = sys.argv[1:]
 
 # Options
-options = "i:o:"
+options = "i:o:s:"
 
 # Long options
-long_options = ["input", "output"]
+long_options = ["input", "output", "table-size"]
 
 
 def main():
     input_file = "./input.txt"
     output_file = "./output.txt"
+    table_size = 4
     try:
         arguments, values = getopt.getopt(argument_list, options, long_options)
         for currentArgument, currentValue in arguments:
@@ -23,12 +24,14 @@ def main():
                 input_file = currentValue
             elif currentArgument in ("-o", "--output"):
                 output_file = currentValue
+            elif currentArgument in ("-s", "--table-size"):
+                table_size = int(currentValue)
     except getopt.error as err:
         print(str(err))
 
     inputs = parse_input(input_file)
     logger = Logger()
-    hashtable = Hashtable(4, logger)
+    hashtable = Hashtable(table_size, logger)
 
     for ipt in inputs:
         cmd, value = ipt
