@@ -77,12 +77,13 @@ class Hashtable:
         hash_result = self._hash_fn(value)
         offset = 0
         position = (hash_result + offset) % self._table_size
+        initial_position = position
         while self._table[position].is_defined():
             offset += 1
             position = (hash_result + offset) % self._table_size
         self._table[position] = Element(value)
 
-        return hash_result, position
+        return initial_position, position
 
     def add(self, value: np.int64) -> int:
         hash_result, position = self._internal_add(value)
@@ -115,6 +116,7 @@ class Hashtable:
         hash_result = self._hash_fn(value)
         offset = 0
         position = (hash_result + offset) % self._table_size
+        initial_position = position
         element = self._table[position]
 
         while (element.removed or element.value != value) and offset < self._table_size:
@@ -122,7 +124,7 @@ class Hashtable:
             element = self._table[position]
             offset += 1
 
-        return (hash_result, position) if element.value == value else (hash_result, -1)
+        return (initial_position, position) if element.value == value else (initial_position, -1)
 
     def get(self, value: np.int64) -> (int, int):
         hash_result, position = self._internal_get(value)
@@ -152,6 +154,7 @@ class Hashtable:
         self.logger.cmd(Cmd.METADE_TAM, self._table_size)
 
     def _clean_removed(self):
+        '''
         def clean(i=0):
             removed_start = None
             removed_end = None
@@ -182,6 +185,11 @@ class Hashtable:
                 clean(i)
 
         clean()
+        '''
+
+        old_table = self._table.copy()
+        self._table = _init_table(self._table_size)
+        self._copy(old_table)
 
         self._removed_count = 0
 
